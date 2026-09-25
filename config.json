@@ -2,5 +2,6 @@
   "note_type": "Tuzi",
   "hanzi_field": "Hanzi",
   "pinyin_field": "Pinyin",
+  "add_spaces": true,
   "ankiconnect_url": "http://127.0.0.1:8765"
 }

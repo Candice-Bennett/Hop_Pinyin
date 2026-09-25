@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import unicodedata
 
 SYLLABLES = {
@@ -92,12 +93,18 @@ def _find_split(base: str, target: int) -> list[int] | None:
     return bounds[:-1]
 
 
+def remove_spaces(reading: str) -> str:
+    return re.sub(r"(?:\s|&nbsp;)+", "", reading)
+
+
 def space_pinyin(word: str, reading: str) -> str:
-    if not reading or " " in reading:
+    if not reading:
         return reading
+    original = reading
+    reading = remove_spaces(reading)
     base = _toneless(reading)
     if not base.isalpha():
-        return reading
+        return original
     n_chars = len(word)
     for target in [n_chars, *range(n_chars - 1, 0, -1)]:
         bounds = _find_split(base, target)
@@ -109,4 +116,4 @@ def space_pinyin(word: str, reading: str) -> str:
                 start = b
             parts.append(reading[start:])
             return " ".join(parts)
-    return reading
+    return original

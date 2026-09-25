@@ -9,8 +9,8 @@ entry point is [main.py](main.py), and the pipeline steps live under
 
 - Finds every note of the note type set in [config.json](config.json).
 - Reads the Hanzi field and Pinyin field off each note.
-- Splits the pinyin to have spaces.
-- Already-spaced Pinyin is left untouched.
+- If `add_spaces` in config.json is `true`, splits the pinyin into one syllable per character.
+- If it's `false`, removes every space.
 
 ## Prerequisites
 
@@ -32,14 +32,14 @@ open the extracted folder in File Explorer, click the address bar, type `cmd`, a
 ## Running Hop Pinyin
 
 With Anki open, set `note_type`, `hanzi_field` and `pinyin_field` in
-[config.json](config.json) to match your note type, then:
+[config.json](config.json) to match your note type, set `add_spaces`, then:
 
 ```
 pip install -r requirements.txt
 python main.py
 ```
 
-It'll print how many notes need spacing and ask you to confirm before
+It'll print how many notes would change and ask you to confirm before
 updating anything.
 
 ## Config ([config.json](config.json))
@@ -48,5 +48,6 @@ updating anything.
 |---|---|
 | `note_type` | the Anki note type to update |
 | `hanzi_field` | field holding the Hanzi word |
-| `pinyin_field` | field holding the Pinyin reading to space out |
+| `pinyin_field` | field holding the Pinyin reading to update |
+| `add_spaces` | `true` to add spaces, `false` to remove them |
 | `ankiconnect_url` | default `http://127.0.0.1:8765` |

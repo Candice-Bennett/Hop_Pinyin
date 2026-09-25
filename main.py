@@ -15,7 +15,7 @@ from pinyin_updater import PinyinUpdater
 
 def ask_confirm(count: int) -> bool:
     while True:
-        answer = input(f"Update {count} note(s) with spaced pinyin? [y/N]: ")
+        answer = input(f"Update {count} note(s)? [y/N]: ")
         answer = answer.strip().lower()
         if answer in ("y", "yes"):
             return True
@@ -47,8 +47,8 @@ def main() -> None:
         )
 
     updater = PinyinUpdater(client, cfg.note_type, cfg.hanzi_field, cfg.pinyin_field)
-    updates = updater.compute_updates()
-    print(f"Pinyin: {len(updates)} note(s) need spacing")
+    updates = updater.compute_updates(cfg.add_spaces)
+    print(f"Pinyin: {len(updates)} note(s) need {'spacing' if cfg.add_spaces else 'spaces removed'}")
 
     if not updates:
         return

@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 from ankiconnect_client import AnkiConnectClient
 from console import warn
-from pinyin_spacing import space_pinyin
+from pinyin_spacing import remove_spaces, space_pinyin
 
 
 @dataclass
@@ -37,7 +37,7 @@ class PinyinUpdater:
         warn(f"Pinyin: field {field_name!r} not found on {self.note_type!r} (fields: {actual_fields})")
         return None
 
-    def compute_updates(self) -> list[PinyinUpdate]:
+    def compute_updates(self, add_spaces: bool = True) -> list[PinyinUpdate]:
         note_ids = self.client.invoke("findNotes", {"query": f'note:"{self.note_type}"'})
         if not note_ids:
             warn(f"Pinyin: no notes found for note type {self.note_type!r}, check the spelling in Anki")
@@ -48,6 +48,7 @@ class PinyinUpdater:
         pinyin_field = self._resolve_field(actual_fields, self.pinyin_field)
         if hanzi_field is None or pinyin_field is None:
             return []
+        self.pinyin_field = pinyin_field
 
         infos = self.client.invoke("notesInfo", {"notes": note_ids})
         updates = []
@@ -56,10 +57,10 @@ class PinyinUpdater:
             pinyin = info.get("fields", {}).get(pinyin_field, {}).get("value", "")
             if not hanzi or not pinyin:
                 continue
-            spaced = space_pinyin(hanzi, pinyin)
-            if spaced == pinyin:
+            updated = space_pinyin(hanzi, pinyin) if add_spaces else remove_spaces(pinyin)
+            if updated == pinyin:
                 continue
-            updates.append(PinyinUpdate(info["noteId"], hanzi, pinyin, spaced))
+            updates.append(PinyinUpdate(info["noteId"], hanzi, pinyin, updated))
         return updates
 
     def apply(self, updates: list[PinyinUpdate]) -> None:

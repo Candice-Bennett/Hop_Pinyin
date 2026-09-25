@@ -13,6 +13,7 @@ class Config:
     note_type: str = ""
     hanzi_field: str = "Hanzi"
     pinyin_field: str = "Pinyin"
+    add_spaces: bool = True
     ankiconnect_url: str = "http://127.0.0.1:8765"
 
     @classmethod
