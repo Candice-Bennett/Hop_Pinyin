@@ -65,9 +65,15 @@ def _base_char(c: str) -> str:
     return (stripped or c).lower()
 
 
-def _toneless(reading: str) -> str:
-    return "".join(_base_char(c) for c in reading)
-
+def _toneless(reading: str) -> tuple[str, list[int]]:
+    base, starts = [], []
+    for i, c in enumerate(reading):
+        if unicodedata.category(c) == "Mn":
+            continue
+        for b in _base_char(c).replace("v", "u"):
+            base.append(b)
+            starts.append(i)
+    return "".join(base), starts
 
 def _find_split(base: str, target: int) -> list[int] | None:
     n = len(base)
@@ -102,7 +108,7 @@ def space_pinyin(word: str, reading: str) -> str:
         return reading
     original = reading
     reading = remove_spaces(reading)
-    base = _toneless(reading)
+    base, starts = _toneless(reading)
     if not base.isalpha():
         return original
     n_chars = len(word)
@@ -112,8 +118,20 @@ def space_pinyin(word: str, reading: str) -> str:
             parts = []
             start = 0
             for b in bounds:
-                parts.append(reading[start:b])
-                start = b
+                parts.append(reading[start:starts[b]])
+                start = starts[b]
             parts.append(reading[start:])
             return " ".join(parts)
     return original
+
+_U_AFTER = re.compile(r"([jqxy])([uU])", re.IGNORECASE)
+
+def convert_u(reading: str, use_umlaut: bool = False) -> str:
+    decomposed = unicodedata.normalize("NFD", reading)
+    if not _U_AFTER.search(decomposed):
+        return reading
+    if use_umlaut:
+        repl = lambda m: m.group(1) + m.group(2) + "\u0308"
+    else:
+        repl = lambda m: m.group(1) + ("V" if m.group(2) == "U" else "v")
+    return unicodedata.normalize("NFC", _U_AFTER.sub(repl, decomposed))

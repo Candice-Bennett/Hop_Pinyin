@@ -11,6 +11,7 @@ entry point is [main.py](main.py), and the pipeline steps live under
 - Reads the Hanzi field and Pinyin field off each note.
 - If `add_spaces` in config.json is `true`, splits the pinyin into one syllable per character.
 - If it's `false`, removes every space.
+- can swap u's with v/ü when preceeded by y/j/q/x. This is technically incorrect pinyin however it is a common mistake learners make to pronounce qu like qoo rather than qü. The aim of the replacement is to force users to use the umlaut sign to sound more natural
 
 ## Prerequisites
 
@@ -50,4 +51,6 @@ updating anything.
 | `hanzi_field` | field holding the Hanzi word |
 | `pinyin_field` | field holding the Pinyin reading to update |
 | `add_spaces` | `true` to add spaces, `false` to remove them |
+| `u_to_v` | `true` to swap u's for v's when they follow y, x, j or q |
+| `use_umlaut` | `true` to, rather than swap for v, swap for ü |
 | `ankiconnect_url` | default `http://127.0.0.1:8765` |

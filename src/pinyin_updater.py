@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 from ankiconnect_client import AnkiConnectClient
 from console import warn
-from pinyin_spacing import remove_spaces, space_pinyin
+from pinyin_spacing import convert_u, remove_spaces, space_pinyin
 
 
 @dataclass
@@ -21,11 +21,14 @@ def strip_html(text: str) -> str:
 
 
 class PinyinUpdater:
-    def __init__(self, client: AnkiConnectClient, note_type: str, hanzi_field: str, pinyin_field: str):
+    def __init__(self, client, note_type, hanzi_field, pinyin_field,
+                 u_to_v: bool = False, use_umlaut: bool = False):
         self.client = client
         self.note_type = note_type
         self.hanzi_field = hanzi_field
         self.pinyin_field = pinyin_field
+        self.u_to_v = u_to_v
+        self.use_umlaut = use_umlaut
 
     def _resolve_field(self, actual_fields: list[str], field_name: str) -> str | None:
         if field_name in actual_fields:
@@ -58,6 +61,8 @@ class PinyinUpdater:
             if not hanzi or not pinyin:
                 continue
             updated = space_pinyin(hanzi, pinyin) if add_spaces else remove_spaces(pinyin)
+            if self.u_to_v:
+                updated = convert_u(updated, self.use_umlaut)
             if updated == pinyin:
                 continue
             updates.append(PinyinUpdate(info["noteId"], hanzi, pinyin, updated))

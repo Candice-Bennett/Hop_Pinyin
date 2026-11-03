@@ -46,10 +46,11 @@ def main() -> None:
             "  - Otherwise Anki might just be busy (e.g. syncing), try again in a bit"
         )
 
-    updater = PinyinUpdater(client, cfg.note_type, cfg.hanzi_field, cfg.pinyin_field)
+    updater = PinyinUpdater(client, cfg.note_type, cfg.hanzi_field, cfg.pinyin_field,
+                            cfg.u_to_v, cfg.use_umlaut)
     updates = updater.compute_updates(cfg.add_spaces)
-    print(f"Pinyin: {len(updates)} note(s) need {'spacing' if cfg.add_spaces else 'spaces removed'}")
-
+    print(f"Pinyin: {len(updates)} note(s) need updating")
+    
     if not updates:
         return
 

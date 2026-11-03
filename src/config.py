@@ -14,6 +14,8 @@ class Config:
     hanzi_field: str = "Hanzi"
     pinyin_field: str = "Pinyin"
     add_spaces: bool = True
+    u_to_v: bool = False
+    use_umlaut: bool = False
     ankiconnect_url: str = "http://127.0.0.1:8765"
 
     @classmethod
