@@ -124,14 +124,26 @@ def space_pinyin(word: str, reading: str) -> str:
             return " ".join(parts)
     return original
 
-_U_AFTER = re.compile(r"([jqxy])([uU])", re.IGNORECASE)
+_TONE = "\u0300\u0301\u0304\u030c"
+_U_AFTER = re.compile(
+    rf"([jqxy])(u)\u0308?([{_TONE}]?)(?:([ae])([{_TONE}]?))?", re.IGNORECASE
+)
+_DOUBLE = re.compile(r"(\u0308[\u0300-\u036f]*?)\u0308+")
+
 
 def convert_u(reading: str, use_umlaut: bool = False) -> str:
-    decomposed = unicodedata.normalize("NFD", reading)
-    if not _U_AFTER.search(decomposed):
-        return reading
-    if use_umlaut:
-        repl = lambda m: m.group(1) + m.group(2) + "\u0308"
-    else:
-        repl = lambda m: m.group(1) + ("V" if m.group(2) == "U" else "v")
-    return unicodedata.normalize("NFC", _U_AFTER.sub(repl, decomposed))
+    d = unicodedata.normalize("NFD", reading)
+    d = re.sub("\u0308{2,}", "\u0308", d)
+    prev = None
+    while prev != d:
+        prev, d = d, _DOUBLE.sub(r"\1", d)
+
+    def repl(m: re.Match) -> str:
+        j, u, t1, vowel, t2 = m.groups()
+        vowel = vowel or ""
+        if use_umlaut:
+            return j + u + "\u0308" + (t1 or t2 or "") + vowel
+        return j + ("V" if u == "U" else "v") + t1 + vowel + (t2 or "")
+
+    result = unicodedata.normalize("NFC", _U_AFTER.sub(repl, d))
+    return reading if result == unicodedata.normalize("NFC", reading) else result
